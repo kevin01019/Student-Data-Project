@@ -1,146 +1,116 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <iomanip>
-
 using namespace std;
 
-const int SIZE = 5;
+const int MAX_SIZE = 100;
 
-struct Student {
-    string name;
-    int score;
-};
+string names[MAX_SIZE];
+int scores[MAX_SIZE];
+int count = 0;
 
-void readData(Student students[], int &count) {
+void loadData() {
     ifstream inFile;
     inFile.open("data.txt");
     
     if (!inFile) {
-        cout << "Unable to open file." << endl;
+        cout << "no file found" << endl;
         return;
     }
     
-    count = 0;
-    while (inFile >> students[count].name >> students[count].score && count < SIZE) {
+    while (inFile >> names[count] >> scores[count]) {
         count++;
+        if (count == MAX_SIZE)
+            break;
     }
     
     inFile.close();
 }
 
-void displayAll(Student students[], int count) {
-    cout << "\n--- All Students ---" << endl;
+void displayData() {
+    cout << "Name" << "     " << "Score" << endl;
+    cout << "-------------------" << endl;
+    
     for (int i = 0; i < count; i++) {
-        cout << "Name: " << students[i].name << " | Score: " << students[i].score << endl;
+        cout << names[i] << "     " << scores[i] << endl;
     }
 }
 
-void findHighest(Student students[], int count) {
-    if (count == 0) return;
+void addEntry() {
+    string n;
+    int s;
     
-    int highestIndex = 0;
-    for (int i = 1; i < count; i++) {
-        if (students[i].score > students[highestIndex].score) {
-            highestIndex = i;
+    if (count >= MAX_SIZE) {
+        cout << "cant add more" << endl;
+    }
+    
+    cout << "enter name: ";
+    cin >> n;
+    cout << "enter score: ";
+    cin >> s;
+    
+    names[count] = n;
+    scores[count] = s;
+    count++;
+}
+
+void searchEntry() {
+    string search;
+    cout << "enter name: ";
+    cin >> search;
+    
+    for (int i = 0; i < count; i++) {
+        if (names[i] == search) {
+            cout << names[i] << " " << scores[i] << endl;
+            return;
         }
     }
-    
-    cout << "\nHighest Score: " << students[highestIndex].name 
-         << " with " << students[highestIndex].score << endl;
+    cout << "not found" << endl;
 }
 
-void findLowest(Student students[], int count) {
-    if (count == 0) return;
+void saveData(string names[], int scores[], int count) {
+    ofstream outFile;
+    outFile.open("data.txt");
     
-    int lowestIndex = 0;
-    for (int i = 1; i < count; i++) {
-        if (students[i].score < students[lowestIndex].score) {
-            lowestIndex = i;
-        }
-    }
-    
-    cout << "\nLowest Score: " << students[lowestIndex].name 
-         << " with " << students[lowestIndex].score << endl;
-}
-
-void calculateAverage(Student students[], int count) {
-    if (count == 0) return;
-    
-    int total = 0;
     for (int i = 0; i < count; i++) {
-        total += students[i].score;
+        outFile << names[i] << " " << scores[i] << endl;
     }
     
-    double average = static_cast<double>(total) / count;
-    cout << "\nAverage Score: " << fixed << setprecision(2) << average << endl;
-}
-
-void searchByName(Student students[], int count) {
-    string searchName;
-    cout << "\nEnter name to search: ";
-    cin >> searchName;
-    
-    bool found = false;
-    for (int i = 0; i < count; i++) {
-        if (students[i].name == searchName) {
-            cout << "Found: " << students[i].name << " | Score: " << students[i].score << endl;
-            found = true;
-            break;
-        }
-    }
-    
-    if (!found) {
-        cout << "Student not found." << endl;
-    }
+    outFile.close();
 }
 
 int main() {
-    Student students[SIZE];
-    int count = 0;
+    loadData();
+    
     int choice;
     
-    readData(students, count);
-    
-    if (count == 0) {
-        cout << "No data found in file." << endl;
-        return 1;
-    }
-    
-    do {
-        cout << "\n--- Menu ---" << endl;
-        cout << "1. Display all students" << endl;
-        cout << "2. Find highest score" << endl;
-        cout << "3. Find lowest score" << endl;
-        cout << "4. Calculate average score" << endl;
-        cout << "5. Search for a student" << endl;
-        cout << "6. Exit" << endl;
-        cout << "Enter your choice: ";
+    while (true) {
+        cout << "\n1. View Data" << endl;
+        cout << "2. Add Entry" << endl;
+        cout << "3. Search Entry" << endl;
+        cout << "4. Save Data" << endl;
+        cout << "5. Exit" << endl;
         cin >> choice;
         
-        switch (choice) {
-            case 1:
-                displayAll(students, count);
-                break;
-            case 2:
-                findHighest(students, count);
-                break;
-            case 3:
-                findLowest(students, count);
-                break;
-            case 4:
-                calculateAverage(students, count);
-                break;
-            case 5:
-                searchByName(students, count);
-                break;
-            case 6:
-                cout << "Goodbye!" << endl;
-                break;
-            default:
-                cout << "Invalid choice. Try again." << endl;
+        if (choice == 1) {
+            displayData();
         }
-    } while (choice != 6);
+        else if (choice == 2) {
+            addEntry();
+        }
+        else if (choice == 3) {
+            searchEntry();
+        }
+        else if (choice == 4) {
+            saveData(names, scores, count);
+        }
+        else if (choice == 5) {
+            break;
+        }
+        else {
+            cout << "invalid" << endl;
+        }
+    }
     
     return 0;
 }
